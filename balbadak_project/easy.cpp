@@ -1,9 +1,12 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>  // SFML 오디오 관련 헤더 추가
 #include <cstdlib>  // 난수(정의된 범위 내에서 무작위로 추출한 수) 생성
 #include <ctime>    // 현재 시간 
 #include <vector>   // 동적 배열을 제공
 
+
 void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
+
     // 창 설정: 창 크기 및 색상 유지
     window.setSize(sf::Vector2u(800, 500));
     window.clear(sf::Color(222, 231, 249));
@@ -53,10 +56,33 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
     // 클릭된 스프라이트를 추적하기 위한 배열 (기본값은 false, 클릭된 경우 true)
     std::vector<bool> clicked(sprites.size(), false);
 
+    // 소리 초기화
+    sf::Music bgm;
+    if (!bgm.openFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\game_bgm.mp3")) return;
+    bgm.setLoop(true);
+    bgm.setVolume(40);  // 배경 음악 볼륨 설정
+    bgm.play();
+
+    sf::SoundBuffer clickBuffer, countdownBuffer, gameOverBuffer;
+    if (!clickBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\balbadak_tap.mp3") ||
+        !countdownBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\timer_second.mp3") ||
+        !gameOverBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\gameover.mp3")) return;
+
+    sf::Sound clickSound(clickBuffer);
+    sf::Sound countdownSound(countdownBuffer);
+    sf::Sound gameOverSound(gameOverBuffer);
+
+    // 효과음 볼륨 설정
+    clickSound.setVolume(50);       // 클릭 소리 볼륨 설정
+    countdownSound.setVolume(70);   // 카운트다운 소리 볼륨 설정
+    gameOverSound.setVolume(50);    // 게임 종료 소리 볼륨 설정
+
     // 시계 설정
     sf::Clock clock;
     float spawnInterval = 1.0f; // 1초 간격으로 이미지 변경
     sf::Clock timerClock;  // 게임 타이머용 시계
+
+    bool countdownPlayed = false; // 10초 카운트다운 소리 재생 여부 확인
 
     while (window.isOpen()) {
         sf::Event event;
@@ -79,6 +105,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
                             else if (i == 1) score += 3;
                             else if (i == 2) score += 1;
                             clicked[i] = true;  // 클릭된 이미지로 표시
+                            clickSound.play(); // 클릭 소리 재생
                         }
                     }
                 }
@@ -102,10 +129,14 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
 
         // 점수 텍스트 업데이트
         scoreText.setString("score : " + std::to_string(score));
-
         // 타이머 업데이트 (초 단위)
         int elapsedTime = static_cast<int>(timerClock.getElapsedTime().asSeconds());
-        timerText.setString("timer: " + std::to_string(30 - elapsedTime));
+        timerText.setString("timer : " + std::to_string(30 - elapsedTime));
+
+        if (30 - elapsedTime <= 10 && !countdownPlayed) {
+            countdownSound.play();
+            countdownPlayed = true; // 10초 소리 재생
+        }
 
         // 타이머가 10초 이하일 때 색상 빨간색으로 변경
         if (30 - elapsedTime <= 10) {
@@ -117,6 +148,8 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
 
         // 30초가 지나면 게임 클리어 실패
         if (elapsedTime >= 30) {
+            bgm.stop(); // BGM 정지
+            gameOverSound.play(); // 게임 종료 소리 재생
             sf::Text gameOverText;
             gameOverText.setFont(font);
             gameOverText.setCharacterSize(72);
@@ -127,7 +160,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
             window.clear(sf::Color(222, 231, 249));  // 배경 색상
             window.draw(gameOverText);  // 게임 종료 텍스트 그리기
             window.display();
-            sf::sleep(sf::seconds(3));  // 3초 후에 종료
+            sf::sleep(sf::seconds(5));  // 5초 후에 종료
             window.close();
             return;
         }
