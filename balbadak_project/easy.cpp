@@ -175,8 +175,9 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         }
 
         // 100점이 넘으면 고양이 태어남
-        if (score >= 30) {  
+        if (score >= 100) {  
             bgm.stop(); // BGM 정지
+            countdownSound.stop();  // 타이머 정지
             gameWinSound.play(); // 게임 종료 소리 재생
 
             // 알 이미지 로드
