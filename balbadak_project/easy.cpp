@@ -4,7 +4,7 @@
 #include <ctime>    // 현재 시간 
 #include <vector>   // 동적 배열을 제공
 
-
+// easyLevel 함수 선언
 void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
 
     // 창 설정: 창 크기 및 색상 유지
@@ -63,19 +63,24 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
     bgm.setVolume(40);  // 배경 음악 볼륨 설정
     bgm.play();
 
-    sf::SoundBuffer clickBuffer, countdownBuffer, gameOverBuffer;
+    sf::SoundBuffer clickBuffer, countdownBuffer, gameOverBuffer, gameWinBuffer; 
     if (!clickBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\balbadak_tap.mp3") ||
         !countdownBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\timer_second.mp3") ||
-        !gameOverBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\gameover.mp3")) return;
+        !gameOverBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\gameover.mp3") ||
+        !gameWinBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\game_win.mp3")) { 
+        return;  // 소리 파일 중 하나라도 로드 실패 시 종료
+    }
 
     sf::Sound clickSound(clickBuffer);
     sf::Sound countdownSound(countdownBuffer);
     sf::Sound gameOverSound(gameOverBuffer);
+    sf::Sound gameWinSound(gameWinBuffer);
 
     // 효과음 볼륨 설정
     clickSound.setVolume(50);       // 클릭 소리 볼륨 설정
     countdownSound.setVolume(70);   // 카운트다운 소리 볼륨 설정
-    gameOverSound.setVolume(50);    // 게임 종료 소리 볼륨 설정
+    gameOverSound.setVolume(50);    // 게임 오버 소리 볼륨 설정
+    gameWinSound.setVolume(50);     // 게임 승리 소리 볼륨
 
     // 시계 설정
     sf::Clock clock;
@@ -150,6 +155,8 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         if (elapsedTime >= 30) {
             bgm.stop(); // BGM 정지
             gameOverSound.play(); // 게임 종료 소리 재생
+
+            // 게임 오버 텍스트 설정
             sf::Text gameOverText;
             gameOverText.setFont(font);
             gameOverText.setCharacterSize(72);
@@ -157,23 +164,66 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
             gameOverText.setString(L"저런... 다음에 또 도전하세요!");
             gameOverText.setPosition(90, 208);
 
+            // 화면 지우기 및 게임 오버 메시지 출력
             window.clear(sf::Color(222, 231, 249));  // 배경 색상
             window.draw(gameOverText);  // 게임 종료 텍스트 그리기
             window.display();
+
             sf::sleep(sf::seconds(5));  // 5초 후에 종료
-            window.close();
+            window.close();  // 창 닫기
             return;
         }
-        // 100점이 넘으면 puplecat.cpp로 이동
-        if (score >= 100) {
-            
 
-            system("start purplecat.cpp"); // purplecat.cpp를 실행
-            return; // 종료
+        // 100점이 넘으면 고양이 태어남
+        if (score >= 30) {  // 수정된 부분: score >= 30으로 변경
+            bgm.stop(); // BGM 정지
+            gameWinSound.play(); // 게임 종료 소리 재생
+
+            // 알 이미지 로드
+            sf::Texture catTexture;
+            if (!catTexture.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\img\\pupleegg.png")) {
+                return;  // 이미지 로드 실패 시 종료
+            }
+
+            // 알 스프라이트
+            sf::Sprite catSprite;
+            catSprite.setTexture(catTexture);
+            float scaleX = 190.0f / catSprite.getLocalBounds().width;
+            float scaleY = 225.0f / catSprite.getLocalBounds().height;
+            catSprite.setScale(scaleX, scaleY);
+            catSprite.setPosition(305, 174);  // 알 이미지 위치
+
+            // 축하 텍스트 생성
+            sf::Text congratulationText;
+            congratulationText.setFont(font);
+            congratulationText.setCharacterSize(65);
+            congratulationText.setFillColor(sf::Color(0, 0, 0));
+            congratulationText.setString(L"축하드려요!");
+            congratulationText.setPosition(296, 46);
+
+            // 게임 성공 화면 그리기
+            window.clear(sf::Color(222, 231, 249));  // 배경 색상
+            window.draw(congratulationText);  // 축하 텍스트 그리기
+            window.draw(catSprite);  // 알 이미지 그리기 
+            window.display();
+
+            // 게임 종료 플래그 설정
+            bool gameOver = false;
+
+            // 게임 종료 플래그가 설정되었으면, 사용자가 창을 닫을 때까지 기다림
+            while (window.isOpen() && !gameOver) {
+                sf::Event event;
+                while (window.pollEvent(event)) {
+                    if (event.type == sf::Event::Closed) {
+                        window.close();  // 창 닫기
+                        gameOver = true;  // 게임 종료 플래그 설정
+                    }
+                }
+            }
+            return;  // 종료 후 함수 반환
         }
 
-
-        // 화면 지우기 및 그리기
+        // 화면 지우기 및 그리기 (게임이 진행 중일 때)
         window.clear(sf::Color(222, 231, 249)); // 동일한 배경 색상
         window.draw(scoreText);  // 점수 텍스트 그리기
         window.draw(timerText);  // 타이머 텍스트 그리기
