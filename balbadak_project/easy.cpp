@@ -175,51 +175,88 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         }
 
         // 100점이 넘으면 고양이 태어남
-        if (score >= 30) {  // 수정된 부분: score >= 30으로 변경
+        if (score >= 30) {  
             bgm.stop(); // BGM 정지
             gameWinSound.play(); // 게임 종료 소리 재생
 
             // 알 이미지 로드
-            sf::Texture catTexture;
-            if (!catTexture.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\img\\pupleegg.png")) {
+            sf::Texture eggTexture;
+            if (!eggTexture.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\img\\pupleegg.png")) {
                 return;  // 이미지 로드 실패 시 종료
             }
 
             // 알 스프라이트
-            sf::Sprite catSprite;
-            catSprite.setTexture(catTexture);
-            float scaleX = 190.0f / catSprite.getLocalBounds().width;
-            float scaleY = 225.0f / catSprite.getLocalBounds().height;
-            catSprite.setScale(scaleX, scaleY);
-            catSprite.setPosition(305, 174);  // 알 이미지 위치
+            sf::Sprite eggSprite;
+            eggSprite.setTexture(eggTexture);
+            float scaleX = 190.0f / eggSprite.getLocalBounds().width;
+            float scaleY = 225.0f / eggSprite.getLocalBounds().height;
+            eggSprite.setScale(scaleX, scaleY);
+            eggSprite.setPosition(305, 182);  // 알 이미지 위치
 
             // 축하 텍스트 생성
             sf::Text congratulationText;
             congratulationText.setFont(font);
-            congratulationText.setCharacterSize(65);
-            congratulationText.setFillColor(sf::Color(0, 0, 0));
-            congratulationText.setString(L"축하드려요!");
-            congratulationText.setPosition(296, 46);
+            congratulationText.setCharacterSize(60);
+            congratulationText.setFillColor(sf::Color(153, 51, 255));
+            congratulationText.setString(L"축하드려요! 이제 알을 눌러보세요!");
+            congratulationText.setPosition(98, 70);
 
-            // 게임 성공 화면 그리기
-            window.clear(sf::Color(222, 231, 249));  // 배경 색상
-            window.draw(congratulationText);  // 축하 텍스트 그리기
-            window.draw(catSprite);  // 알 이미지 그리기 
-            window.display();
+            // 텍스처 로드
+            sf::Texture newTexture;
+            if (!newTexture.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\img\\puplecat.png")) {
+                return;
+            };
+            sf::Sprite newSprite;
+            newSprite.setTexture(newTexture);
+            // 크기 조정: 텍스처가 설정된 이후에 getLocalBounds() 사용
+            scaleX = 285.0f / newSprite.getLocalBounds().width;
+            scaleY = 267.0f / newSprite.getLocalBounds().height;
+            newSprite.setScale(scaleX, scaleY);
+            newSprite.setPosition(257, 169);       // 고양이 이미지 위치
 
-            // 게임 종료 플래그 설정
+            sf::Text newText;
+            newText.setFont(font);
+            newText.setCharacterSize(65);
+            newText.setFillColor(sf::Color(0, 0, 0));
+            newText.setString(L"고양이가 태어났어요!");
+            newText.setPosition(192, 70);
+
+            // 게임 성공 화면 초기화
             bool gameOver = false;
+            bool eggClicked = false; // 알 이미지가 클릭되었는지 여부
 
-            // 게임 종료 플래그가 설정되었으면, 사용자가 창을 닫을 때까지 기다림
+            // 게임 루프
             while (window.isOpen() && !gameOver) {
                 sf::Event event;
                 while (window.pollEvent(event)) {
                     if (event.type == sf::Event::Closed) {
                         window.close();  // 창 닫기
-                        gameOver = true;  // 게임 종료 플래그 설정
+                        gameOver = true;
+                    }
+
+                    // 알 이미지 클릭 이벤트 처리
+                    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                        sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+
+                        if (eggSprite.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos))) {
+                            eggClicked = true;
+                        }
                     }
                 }
+
+                // 화면 업데이트
+                window.clear(sf::Color(222, 231, 249));  // 배경 색상
+                if (eggClicked) {
+                    window.draw(newText);    // 새로운 텍스트 그리기
+                    window.draw(newSprite); // 새로운 이미지 그리기
+                }
+                else {
+                    window.draw(congratulationText);  // 기존 텍스트 그리기
+                    window.draw(eggSprite);          // 알 이미지 그리기
+                }
+                window.display();
             }
+
             return;  // 종료 후 함수 반환
         }
 
