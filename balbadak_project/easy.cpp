@@ -63,6 +63,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
     bgm.setVolume(40);  // 배경 음악 볼륨 설정
     bgm.play();
 
+    // 실제 음원 데이터를 로드하고 저장
     sf::SoundBuffer clickBuffer, countdownBuffer, gameOverBuffer, gameWinBuffer; 
     if (!clickBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\balbadak_tap.mp3") ||
         !countdownBuffer.loadFromFile("C:\\work\\c++_projects\\balbadak_project\\sound\\timer_second.mp3") ||
@@ -71,7 +72,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         return;  // 소리 파일 중 하나라도 로드 실패 시 종료
     }
 
-    sf::Sound clickSound(clickBuffer);
+    sf::Sound clickSound(clickBuffer);      // 클릭 사운드 객체
     sf::Sound countdownSound(countdownBuffer);
     sf::Sound gameOverSound(gameOverBuffer);
     sf::Sound gameWinSound(gameWinBuffer);
@@ -138,6 +139,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         int elapsedTime = static_cast<int>(timerClock.getElapsedTime().asSeconds());
         timerText.setString("timer : " + std::to_string(30 - elapsedTime));
 
+        // 30은 게임의 총 제한 시간 elapsedTime경과된 시간 
         if (30 - elapsedTime <= 10 && !countdownPlayed) {
             countdownSound.play();
             countdownPlayed = true; // 10초 소리 재생
@@ -154,7 +156,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         // 30초가 지나면 게임 클리어 실패
         if (elapsedTime >= 30) {
             bgm.stop(); // BGM 정지
-            gameOverSound.play(); // 게임 종료 소리 재생
+            gameOverSound.play(); // 게임 실패 소리 재생
 
             // 게임 오버 텍스트 설정
             sf::Text gameOverText;
@@ -178,7 +180,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
         if (score >= 100) {  
             bgm.stop(); // BGM 정지
             countdownSound.stop();  // 타이머 정지
-            gameWinSound.play(); // 게임 종료 소리 재생
+            gameWinSound.play();    // 게임 성공 소리 재생
 
             // 알 이미지 로드
             sf::Texture eggTexture;
@@ -215,6 +217,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
             newSprite.setScale(scaleX, scaleY);
             newSprite.setPosition(257, 169);       // 고양이 이미지 위치
 
+            // 알 클릭 후 바뀐 텍스트
             sf::Text newText;
             newText.setFont(font);
             newText.setCharacterSize(65);
@@ -237,8 +240,8 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
 
                     // 알 이미지 클릭 이벤트 처리
                     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-                        sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-
+                        sf::Vector2i mousePos = sf::Mouse::getPosition(window);     // 현재 마우스의 위치를 가져옴 (화면에서)
+                        // 마우스 클릭 위치가 범위에 있는지 확인
                         if (eggSprite.getGlobalBounds().contains(static_cast<sf::Vector2f>(mousePos))) {
                             eggClicked = true;
                         }
@@ -246,7 +249,8 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
                 }
 
                 // 화면 업데이트
-                window.clear(sf::Color(222, 231, 249));  // 배경 색상
+                window.clear(sf::Color(222, 231, 249));  // 배경 색상 동일
+                // 만약 알이 클릭되었다면
                 if (eggClicked) {
                     window.draw(newText);    // 새로운 텍스트 그리기
                     window.draw(newSprite); // 새로운 이미지 그리기
