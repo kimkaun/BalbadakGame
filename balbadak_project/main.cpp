@@ -2,12 +2,16 @@
 #include <locale>
 #include "level.cpp"  // "level.cpp 클래스 포함
 #include "easy.cpp"   // "easy.cpp" 
+#include "normal.cpp" 
+#include "hard.cpp"
 
 // 열거형을 사용하여 게임의 상태를 관리
 enum class GameState {
     Start,  
     Level,  
-    Easy    
+    Easy,
+    Normal,
+    Hard
 };
 
 int main() {
@@ -84,18 +88,30 @@ int main() {
             window.display();                     
         }
 
-        // 난이도 선택 화면 
+        // 난이도 선택 화면
         else if (gameState == GameState::Level) {   // 난이도 선택 화면
             // startLevel클래스의 객체를 생성
             startLevel levelScreen(window, font);
             std::string difficulty = levelScreen.run(); // run() 메서드가 선택된 난이도의 문자열을 반환 
-            if (difficulty == "easy") {         // 반한된 문자열을 difficulty변수에 저장
+            if (difficulty == "easy") {         // 반환된 문자열을 difficulty 변수에 저장
                 gameState = GameState::Easy;    // Easy 난이도를 선택하면 Easy로 상태 변경
             }
+            else if (difficulty == "normal") {  
+                gameState = GameState::Normal;  
+            }
+            else if (difficulty == "hard") {    
+                gameState = GameState::Hard;    
+            }
         }
+        // 각 난이도별 게임 실행
         else if (gameState == GameState::Easy) {
-            // Easy로 상태 변경하면 easyLevel실행
-            easyLevel(window, font);
+            easyLevel(window, font);  // Easy로 상태 변경하면 easyLevel함수 실행
+        }
+        else if (gameState == GameState::Normal) {
+            normalLevel(window, font);  
+        }
+        else if (gameState == GameState::Hard) {
+            hardLevel(window, font);   
         }
     }
 

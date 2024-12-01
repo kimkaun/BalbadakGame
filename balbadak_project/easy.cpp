@@ -85,7 +85,7 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
 
     // 시계 설정
     sf::Clock clock;
-    float spawnInterval = 1.0f; // 1초 간격으로 이미지 변경
+    float spawnInterval = 1.0f; // 1초 간격으로 이미지 변경(easy)
     sf::Clock timerClock;  // 게임 타이머용 시계
 
     bool countdownPlayed = false; // 10초 카운트다운 소리 재생 여부 확인
@@ -261,14 +261,13 @@ void easyLevel(sf::RenderWindow& window, const sf::Font& font) {
                 }
                 window.display();
             }
-
             return;  // 종료 후 함수 반환
         }
 
-        // 화면 지우기 및 그리기 (게임이 진행 중일 때)
-        window.clear(sf::Color(222, 231, 249)); // 동일한 배경 색상
-        window.draw(scoreText);  // 점수 텍스트 그리기
-        window.draw(timerText);  // 타이머 텍스트 그리기
+        // 화면 지우기 및 그리기
+        window.clear(sf::Color(222, 231, 249)); 
+        window.draw(scoreText);  
+        window.draw(timerText); 
         for (const auto& sprite : sprites) {   // 모든 스프라이트 그리기
             window.draw(sprite);
         }
